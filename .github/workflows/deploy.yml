@@ -1,0 +1,51 @@
+name: Deploy OpenProject
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+env:
+  DOCKER_COMPOSE_FILE: docker-compose.simple.yml
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Validate Docker Compose files
+      run: |
+        docker-compose -f $DOCKER_COMPOSE_FILE config
+        docker-compose -f $DOCKER_COMPOSE_FILE -f docker-compose.prod.yml config
+    
+    - name: Check scripts are executable
+      run: |
+        test -x backup.sh
+        test -x health-check.sh
+    
+    - name: Validate environment templates
+      run: |
+        test -f .env.example
+        test -f .env.prod.example
+        # Check that no sensitive data is committed
+        ! grep -r "password.*=" .env.example .env.prod.example || exit 1
+
+  # Uncomment and configure this section for actual deployment
+  # deploy:
+  #   needs: test
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main'
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   
+  #   - name: Deploy to production server
+  #     env:
+  #       DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+  #       DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+  #       DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+  #     run: |
+  #       # Add your deployment commands here
+  #       # Example: rsync files to server, ssh commands, etc.
+  #       echo "Deploy to production server would happen here"
