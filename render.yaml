@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: illini-rm-project-management-app 
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    autoDeploy: true
+    healthCheckPath: /
+    # Optional: add environment variables
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # - key: SOME_SECRET
+      #   sync: false   # set in dashboard later

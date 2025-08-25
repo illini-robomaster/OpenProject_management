@@ -1,4 +1,4 @@
-# My OpenProject Deployment
+# illiniRM OpenProject Deployment
 
 Custom OpenProject deployment configuration with Docker Compose.
 
@@ -17,15 +17,6 @@ Custom OpenProject deployment configuration with Docker Compose.
 - `health-check.sh` - Health monitoring
 - `PRODUCTION_DEPLOYMENT.md` - Deployment guide
 
-## Default Access
-
-- URL: http://localhost:3000
-- Username: admin
-- Password: admin (change immediately!)
-
-## Production Deployment
-
-See `PRODUCTION_DEPLOYMENT.md` for complete production setup instructions.
 
 ## Security Notice
 

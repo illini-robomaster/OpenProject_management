@@ -1,0 +1,7 @@
+{
+  "name": "illini-rm-project-management",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  }
+}

@@ -58,6 +58,23 @@ services:
       IMAP_ENABLED: "${IMAP_ENABLED:-false}"
     volumes:
       - "${OPDATA:-opdata}:/var/openproject/assets"
+      # Custom icon overlays (uncomment after creating files in custom-assets/)
+      - "./custom-assets/logo_openproject.png:/app/app/assets/images/logo_openproject.png:ro"
+      - "./custom-assets/icon_logo.svg:/app/app/assets/images/icon_logo.svg:ro"
+      - "./custom-assets/icon_logo_white.svg:/app/app/assets/images/icon_logo_white.svg:ro"
+      - "./custom-assets/favicon.ico:/app/app/assets/images/favicon.ico:ro"
+      - "./custom-assets/apple-touch-icon-120x120.png:/app/app/assets/images/apple-touch-icon-120x120.png:ro"
+      - "./custom-assets/logo_openproject_narrow.svg:/app/app/assets/images/logo_openproject_narrow.svg:ro"
+      # Additional logo variants in source assets
+      - "./custom-assets/logo_openproject_white_big.png:/app/app/assets/images/logo_openproject_white_big.png:ro"
+      # Also replace precompiled assets (Rails asset pipeline)
+      - "./custom-assets/logo_openproject.png:/app/public/assets/logo_openproject-0ac721deb10b0ac88e34c3a066dc8ce283e9d2601c805ae71fc8dc9548fc0582.png:ro"
+      - "./custom-assets/icon_logo.svg:/app/public/assets/icon_logo-955af4346e973d13afd9f5a3d0d4c63f8002be1125bcd41d8036ff67ee1cdd51.svg:ro"
+      - "./custom-assets/icon_logo_white.svg:/app/public/assets/icon_logo_white-8e3e74afd4629f3f6fed8e229bbc0dfd926fc196d8b8d0f7bf3be3eca9574fb7.svg:ro"
+      - "./custom-assets/logo_openproject_narrow.svg:/app/public/assets/logo_openproject_narrow-b109a77c87bd36817399515b9b09c508e8beaba76a57f2c40fd484d8aa25fa15.svg:ro"
+      # Additional logo variants that might be used in the interface
+      - "./custom-assets/logo_openproject_white_big.png:/app/public/assets/logo_openproject_white_big-2c6d79fa03613154cf6bd67c622dbae5b93ed3199e0e7332d96b6f8ec21f85a1.png:ro"
+      - "./custom-assets/logo_openproject.png:/app/public/assets/styleguide/logo_openproject-0ac721deb10b0ac88e34c3a066dc8ce283e9d2601c805ae71fc8dc9548fc0582.png:ro"
     networks:
       - frontend
       - backend
