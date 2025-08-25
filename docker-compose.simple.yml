@@ -1,0 +1,151 @@
+version: '3.3'
+
+networks:
+  frontend:
+  backend:
+
+volumes:
+  pgdata:
+  opdata:
+
+services:
+  db:
+    image: postgres:13
+    restart: unless-stopped
+    stop_grace_period: "3s"
+    volumes:
+      - "${PGDATA:-pgdata}:/var/lib/postgresql/data"
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-p4ssw0rd}
+      POSTGRES_DB: openproject
+    networks:
+      - backend
+
+  cache:
+    image: memcached
+    restart: unless-stopped
+    networks:
+      - backend
+
+  proxy:
+    build:
+      context: ./proxy
+      args:
+        APP_HOST: web
+    image: openproject/proxy
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:80"
+    depends_on:
+      - web
+    networks:
+      - frontend
+
+  web:
+    image: openproject/openproject:${TAG:-16-slim}
+    restart: unless-stopped
+    command: "./docker/prod/web"
+    environment:
+      OPENPROJECT_HTTPS: "${OPENPROJECT_HTTPS:-false}"
+      OPENPROJECT_HOST__NAME: "${OPENPROJECT_HOST__NAME:-localhost:8080}"
+      OPENPROJECT_HSTS: "${OPENPROJECT_HSTS:-false}"
+      RAILS_CACHE_STORE: "memcache"
+      OPENPROJECT_CACHE__MEMCACHE__SERVER: "cache:11211"
+      OPENPROJECT_RAILS__RELATIVE__URL__ROOT: "${OPENPROJECT_RAILS__RELATIVE__URL__ROOT:-}"
+      DATABASE_URL: "${DATABASE_URL:-postgres://postgres:p4ssw0rd@db/openproject?pool=20&encoding=unicode&reconnect=true}"
+      RAILS_MIN_THREADS: ${RAILS_MIN_THREADS:-4}
+      RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-16}
+      IMAP_ENABLED: "${IMAP_ENABLED:-false}"
+    volumes:
+      - "${OPDATA:-opdata}:/var/openproject/assets"
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      - db
+      - cache
+      - seeder
+    labels:
+      - autoheal=true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080${OPENPROJECT_RAILS__RELATIVE__URL__ROOT:-}/health_checks/default"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  autoheal:
+    image: willfarrell/autoheal:1.2.0
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    environment:
+      AUTOHEAL_CONTAINER_LABEL: autoheal
+      AUTOHEAL_START_PERIOD: 600
+      AUTOHEAL_INTERVAL: 30
+
+  worker:
+    image: openproject/openproject:${TAG:-16-slim}
+    restart: unless-stopped
+    command: "./docker/prod/worker"
+    environment:
+      OPENPROJECT_HTTPS: "${OPENPROJECT_HTTPS:-false}"
+      OPENPROJECT_HOST__NAME: "${OPENPROJECT_HOST__NAME:-localhost:8080}"
+      OPENPROJECT_HSTS: "${OPENPROJECT_HSTS:-false}"
+      RAILS_CACHE_STORE: "memcache"
+      OPENPROJECT_CACHE__MEMCACHE__SERVER: "cache:11211"
+      OPENPROJECT_RAILS__RELATIVE__URL__ROOT: "${OPENPROJECT_RAILS__RELATIVE__URL__ROOT:-}"
+      DATABASE_URL: "${DATABASE_URL:-postgres://postgres:p4ssw0rd@db/openproject?pool=20&encoding=unicode&reconnect=true}"
+      RAILS_MIN_THREADS: ${RAILS_MIN_THREADS:-4}
+      RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-16}
+      IMAP_ENABLED: "${IMAP_ENABLED:-false}"
+    volumes:
+      - "${OPDATA:-opdata}:/var/openproject/assets"
+    networks:
+      - backend
+    depends_on:
+      - db
+      - cache
+      - seeder
+
+  cron:
+    image: openproject/openproject:${TAG:-16-slim}
+    restart: unless-stopped
+    command: "./docker/prod/cron"
+    environment:
+      OPENPROJECT_HTTPS: "${OPENPROJECT_HTTPS:-false}"
+      OPENPROJECT_HOST__NAME: "${OPENPROJECT_HOST__NAME:-localhost:8080}"
+      OPENPROJECT_HSTS: "${OPENPROJECT_HSTS:-false}"
+      RAILS_CACHE_STORE: "memcache"
+      OPENPROJECT_CACHE__MEMCACHE__SERVER: "cache:11211"
+      OPENPROJECT_RAILS__RELATIVE__URL__ROOT: "${OPENPROJECT_RAILS__RELATIVE__URL__ROOT:-}"
+      DATABASE_URL: "${DATABASE_URL:-postgres://postgres:p4ssw0rd@db/openproject?pool=20&encoding=unicode&reconnect=true}"
+      RAILS_MIN_THREADS: ${RAILS_MIN_THREADS:-4}
+      RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-16}
+      IMAP_ENABLED: "${IMAP_ENABLED:-false}"
+    volumes:
+      - "${OPDATA:-opdata}:/var/openproject/assets"
+    networks:
+      - backend
+    depends_on:
+      - db
+      - cache
+      - seeder
+
+  seeder:
+    image: openproject/openproject:${TAG:-16-slim}
+    command: "./docker/prod/seeder"
+    restart: on-failure
+    environment:
+      OPENPROJECT_HTTPS: "${OPENPROJECT_HTTPS:-false}"
+      OPENPROJECT_HOST__NAME: "${OPENPROJECT_HOST__NAME:-localhost:8080}"
+      OPENPROJECT_HSTS: "${OPENPROJECT_HSTS:-false}"
+      RAILS_CACHE_STORE: "memcache"
+      OPENPROJECT_CACHE__MEMCACHE__SERVER: "cache:11211"
+      OPENPROJECT_RAILS__RELATIVE__URL__ROOT: "${OPENPROJECT_RAILS__RELATIVE__URL__ROOT:-}"
+      DATABASE_URL: "${DATABASE_URL:-postgres://postgres:p4ssw0rd@db/openproject?pool=20&encoding=unicode&reconnect=true}"
+      RAILS_MIN_THREADS: ${RAILS_MIN_THREADS:-4}
+      RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-16}
+      IMAP_ENABLED: "${IMAP_ENABLED:-false}"
+    volumes:
+      - "${OPDATA:-opdata}:/var/openproject/assets"
+    networks:
+      - backend

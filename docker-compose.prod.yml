@@ -1,0 +1,63 @@
+# Production Docker Compose Override
+# This file should be used for production deployment
+# Usage: docker-compose -f docker-compose.simple.yml -f docker-compose.prod.yml up -d
+
+version: '3.3'
+
+services:
+  web:
+    environment:
+      # Enable HTTPS for production
+      OPENPROJECT_HTTPS: "true"
+      OPENPROJECT_HSTS: "true"
+      # Set your actual domain name here
+      OPENPROJECT_HOST__NAME: "${DOMAIN_NAME:-your-domain.com}"
+      # Production security settings
+      OPENPROJECT_FORCE_SSL: "true"
+      # Email configuration (set these in production)
+      OPENPROJECT_SMTP_ENABLE_STARTTLS_AUTO: "true"
+      OPENPROJECT_SMTP_TLS: "true"
+      # Add your SMTP settings here
+      # OPENPROJECT_SMTP_ADDRESS: "smtp.your-provider.com"
+      # OPENPROJECT_SMTP_PORT: "587"
+      # OPENPROJECT_SMTP_DOMAIN: "your-domain.com"
+      # OPENPROJECT_SMTP_USER_NAME: "your-email@your-domain.com"
+      # OPENPROJECT_SMTP_PASSWORD: "your-email-password"
+      # OPENPROJECT_MAIL_FROM: "openproject@your-domain.com"
+
+  worker:
+    environment:
+      OPENPROJECT_HTTPS: "true"
+      OPENPROJECT_HSTS: "true"
+      OPENPROJECT_HOST__NAME: "${DOMAIN_NAME:-your-domain.com}"
+      OPENPROJECT_FORCE_SSL: "true"
+
+  cron:
+    environment:
+      OPENPROJECT_HTTPS: "true"
+      OPENPROJECT_HSTS: "true"
+      OPENPROJECT_HOST__NAME: "${DOMAIN_NAME:-your-domain.com}"
+      OPENPROJECT_FORCE_SSL: "true"
+
+  seeder:
+    environment:
+      OPENPROJECT_HTTPS: "true"
+      OPENPROJECT_HSTS: "true"
+      OPENPROJECT_HOST__NAME: "${DOMAIN_NAME:-your-domain.com}"
+      OPENPROJECT_FORCE_SSL: "true"
+
+  db:
+    environment:
+      # Use a strong password for production
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-change-this-password-in-production}"
+    volumes:
+      # Use named volumes for production to ensure data persistence
+      - "pgdata:/var/lib/postgresql/data"
+
+  # Add backup configuration
+  proxy:
+    ports:
+      # For production, you might want to use port 80 and 443
+      - "${HTTP_PORT:-80}:80"
+      # Uncomment the following line if you set up SSL termination at the proxy level
+      # - "${HTTPS_PORT:-443}:443"

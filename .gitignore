@@ -1,0 +1,36 @@
+# Ignore environment files with sensitive data
+.env
+.env.prod
+.env.local
+
+docker-compose.override.yml
+
+# Ignore backup files
+backups/
+*.sql
+*.sql.gz
+*.tar.gz
+
+# Ignore log files
+logs/
+*.log
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ignore temporary files
+tmp/
+temp/
+.tmp/
+
+# Keep example files but ignore actual config
+!.env.example
+!.env.prod.example
