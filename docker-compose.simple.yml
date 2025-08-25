@@ -46,9 +46,9 @@ services:
     restart: unless-stopped
     command: "./docker/prod/web"
     environment:
-      OPENPROJECT_HTTPS: "${OPENPROJECT_HTTPS:-false}"
-      OPENPROJECT_HOST__NAME: "${OPENPROJECT_HOST__NAME:-localhost:8080}"
-      OPENPROJECT_HSTS: "${OPENPROJECT_HSTS:-false}"
+      OPENPROJECT_HTTPS: "true"                    # 从 false 改为 true（Cloudflare 终止 TLS）
+      OPENPROJECT_HOST__NAME: "app.irm-project.uk" # 从 localhost:8080 改为你的域名（不要带端口）
+      OPENPROJECT_HSTS: "true"                     # 可选：开启 HSTS（若确定总是走 HTTPS）
       RAILS_CACHE_STORE: "memcache"
       OPENPROJECT_CACHE__MEMCACHE__SERVER: "cache:11211"
       OPENPROJECT_RAILS__RELATIVE__URL__ROOT: "${OPENPROJECT_RAILS__RELATIVE__URL__ROOT:-}"
